@@ -5,7 +5,7 @@ from numbers import Real
 
 import numpy as np
 import qulacs
-from zquantum.core import circuits
+from orquestra.quantum.circuits import Circuit, GateOperation
 
 
 def _identity(x):
@@ -57,7 +57,7 @@ ZQUANTUM_TO_QULACS_GATES = {
 }
 
 
-def _make_cphase_gate(operation: circuits.GateOperation):
+def _make_cphase_gate(operation: GateOperation):
     matrix = np.diag([1.0, np.exp(1.0j * operation.gate.params[0])])  # type: ignore
     gate_to_add = qulacs.gate.DenseMatrix(operation.qubit_indices[1], matrix)
     gate_to_add.add_control_qubit(operation.qubit_indices[0], 1)
@@ -69,7 +69,7 @@ GATE_SPECIAL_CASES = {
 }
 
 
-def _qulacs_gate(operation: circuits.GateOperation):
+def _qulacs_gate(operation: GateOperation):
     try:
         factory = GATE_SPECIAL_CASES[operation.gate.name]
         return factory(operation)
@@ -89,13 +89,13 @@ def _qulacs_gate(operation: circuits.GateOperation):
     return _custom_qulacs_gate(operation)
 
 
-def _custom_qulacs_gate(operation: circuits.GateOperation):
+def _custom_qulacs_gate(operation: GateOperation):
     matrix = operation.gate.matrix
     dense_matrix = np.array(matrix, dtype=complex)
     return qulacs.gate.DenseMatrix(list(operation.qubit_indices), dense_matrix)
 
 
-def convert_to_qulacs(circuit: circuits.Circuit):
+def convert_to_qulacs(circuit: Circuit):
     qulacs_circuit = qulacs.QuantumCircuit(circuit.n_qubits)
     for operation in circuit.operations:
         qulacs_circuit.add_gate(_qulacs_gate(operation))

@@ -5,16 +5,16 @@ from typing import Any
 
 import numpy as np
 import qulacs
-from qulacs.observable import create_observable_from_openfermion_text
-from zquantum.core.circuits import Circuit, GateOperation
-from zquantum.core.interfaces.backend import QuantumSimulator, StateVector
-from zquantum.core.measurement import (
+from orquestra.quantum.api.backend import QuantumSimulator, StateVector
+from orquestra.quantum.circuits import Circuit, GateOperation
+from orquestra.quantum.measurements import (
     ExpectationValues,
     Measurements,
     sample_from_wavefunction,
 )
-from zquantum.core.openfermion import SymbolicOperator
-from zquantum.core.wavefunction import flip_amplitudes, flip_wavefunction
+from orquestra.quantum.openfermion import SymbolicOperator
+from orquestra.quantum.wavefunction import flip_amplitudes, flip_wavefunction
+from qulacs.observable import create_observable_from_openfermion_text
 
 from .conversions import convert_to_qulacs
 

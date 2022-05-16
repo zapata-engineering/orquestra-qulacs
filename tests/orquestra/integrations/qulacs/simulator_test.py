@@ -3,12 +3,13 @@
 ################################################################################
 import numpy as np
 import pytest
-from qequlacs.simulator import QulacsSimulator
-from zquantum.core import circuits
-from zquantum.core.interfaces.backend_test import (
+from orquestra.quantum.api.backend_test import (
     QuantumSimulatorGatesTest,
     QuantumSimulatorTests,
 )
+from orquestra.quantum.circuits import Circuit, H, MultiPhaseOperation, X
+
+from orquestra.integrations.qulacs.simulator import QulacsSimulator
 
 
 @pytest.fixture
@@ -26,43 +27,43 @@ class TestQulacs(QuantumSimulatorTests):
         "circuit, target_wavefunction",
         [
             (
-                circuits.Circuit(
+                Circuit(
                     [
-                        circuits.H(0),
-                        circuits.H(1),
-                        circuits.MultiPhaseOperation((-0.1, 0.3, -0.5, 0.7)),
-                        circuits.X(0),
-                        circuits.X(0),
+                        H(0),
+                        H(1),
+                        MultiPhaseOperation((-0.1, 0.3, -0.5, 0.7)),
+                        X(0),
+                        X(0),
                     ]
                 ),
                 np.exp(1j * np.array([-0.1, 0.3, -0.5, 0.7])) / 2,
             ),
             (
-                circuits.Circuit(
+                Circuit(
                     [
-                        circuits.H(0),
-                        circuits.H(1),
-                        circuits.MultiPhaseOperation((-0.1, 0.3, -0.5, 0.7)),
-                        circuits.MultiPhaseOperation((-0.2, 0.1, -0.2, -0.3)),
-                        circuits.X(0),
-                        circuits.X(0),
+                        H(0),
+                        H(1),
+                        MultiPhaseOperation((-0.1, 0.3, -0.5, 0.7)),
+                        MultiPhaseOperation((-0.2, 0.1, -0.2, -0.3)),
+                        X(0),
+                        X(0),
                     ]
                 ),
                 np.exp(1j * np.array([-0.3, 0.4, -0.7, 0.4])) / 2,
             ),
             (
-                circuits.Circuit(
+                Circuit(
                     [
-                        circuits.MultiPhaseOperation((-0.1, 0.3, -0.5, 0.7)),
+                        MultiPhaseOperation((-0.1, 0.3, -0.5, 0.7)),
                     ]
                 ),
                 np.array([np.exp(-0.1j), 0, 0, 0]),
             ),
             (
-                circuits.Circuit(
+                Circuit(
                     [
-                        circuits.H(0),
-                        circuits.MultiPhaseOperation((-0.1, 0.3, -0.5, 0.7)),
+                        H(0),
+                        MultiPhaseOperation((-0.1, 0.3, -0.5, 0.7)),
                     ]
                 ),
                 np.array([np.exp(-0.1j), 0, np.exp(-0.5j), 0]) / np.sqrt(2),
@@ -78,9 +79,7 @@ class TestQulacs(QuantumSimulatorTests):
 
     def test_run_circuit_and_measure_works_with_multiphase_operator(self, backend):
         params = [-0.1, 0.3, -0.5, 0.7]
-        circuit = circuits.Circuit(
-            [circuits.H(0), circuits.X(1), circuits.MultiPhaseOperation(params)]
-        )
+        circuit = Circuit([H(0), X(1), MultiPhaseOperation(params)])
 
         measurements = backend.run_circuit_and_measure(circuit, n_samples=1000)
 

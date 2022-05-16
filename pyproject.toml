@@ -25,6 +25,7 @@ module = [
     'scipy.*',
     'sympy.*',
     'rapidjson',
+    'qulacs.*',
 ]
 ignore_missing_imports = true
 
