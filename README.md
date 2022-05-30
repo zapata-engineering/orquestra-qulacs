@@ -11,7 +11,7 @@ Just run `pip install .` from the main directory.
 
 ## Usage
 
-`orquestra-qulacs` is a Python module that exposes Qulacs's simulators as an [`orquestra`](https://github.com/zapatacomputing/orquestra-quantum/blob/main/src/orquestra/quantum/api/backend.py) `QuantumSimulator`. It can be imported with:
+`orquestra-qulacs` is a Python module that exposes Qulacs's simulators as an [`QuantumSimulator`](https://github.com/zapatacomputing/orquestra-quantum/blob/main/src/orquestra/quantum/api/backend.py) compatible with [Orquestra Core framework](https://github.com/zapatacomputing/orquestra-core). It can be imported with:
 
 ```
 from orquestra.integrations.qulacs.simulator import QulacsSimulator
