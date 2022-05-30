@@ -13,7 +13,7 @@ from orquestra.quantum.measurements import (
     sample_from_wavefunction,
 )
 from orquestra.quantum.openfermion import SymbolicOperator
-from orquestra.quantum.wavefunction import flip_amplitudes, flip_wavefunction
+from orquestra.quantum.wavefunction import flip_amplitudes
 from qulacs.observable import create_observable_from_openfermion_text
 
 from .conversions import convert_to_qulacs
