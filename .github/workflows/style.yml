@@ -33,12 +33,11 @@ jobs:
       # Clones a repository.
       # If it's private, it also requires ssh-key and adding it to repo secrets on GitHub
       # ---------------------------------------------------------------------------------
-      # - name: Get orquestra-quantum
-      #   uses: actions/checkout@v2
-      #   with:
-      #     repository: zapatacomputing/orquestra-quantum
-      #     path: orquestra-quantum
-      #     ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Get orquestra-quantum
+        uses: actions/checkout@v2
+        with:
+          repository: zapatacomputing/orquestra-quantum
+          path: orquestra-quantum
 
       # ------------------------------------------------------------------------
       # Loads private SSH key to the SSH agent. Allows to install dependencies
