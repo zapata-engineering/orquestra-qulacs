@@ -7,13 +7,9 @@ import numpy as np
 import qulacs
 from orquestra.quantum.api.backend import QuantumSimulator, StateVector
 from orquestra.quantum.circuits import Circuit, GateOperation
-from orquestra.quantum.measurements import (
-    ExpectationValues,
-    Measurements,
-    sample_from_wavefunction,
-)
+from orquestra.quantum.measurements import ExpectationValues, Measurements
 from orquestra.quantum.openfermion import SymbolicOperator
-from orquestra.quantum.wavefunction import flip_amplitudes
+from orquestra.quantum.wavefunction import flip_amplitudes, sample_from_wavefunction
 from qulacs.observable import create_observable_from_openfermion_text
 
 from .conversions import convert_to_qulacs
