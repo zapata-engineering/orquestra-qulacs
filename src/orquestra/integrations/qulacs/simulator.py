@@ -43,19 +43,19 @@ class QulacsSimulator(QuantumSimulator):
         expectation_values = []
         qulacs_state = self._get_qulacs_state(circuit)
 
-        for op in qubit_operator.terms:
+        for term in qubit_operator.terms:
             # openfermion text is in the style of '2.0 [Z0 Z1]' if the operator is
             # QubitOperator("Z0 Z1", 2) aka PauliTerm("2*Z0*Z1")
             openfermion_terms_str = " ".join(
-                [f"{pauli_str}{qubit_idx}" for qubit_idx, pauli_str in op._ops.items()]
+                [f"{pauli_str}{qubit_idx}" for qubit_idx, pauli_str in term.operations]
             )
-            openfermion_str = f"{op.coefficient} [{openfermion_terms_str}]"
+            openfermion_str = f"{term.coefficient} [{openfermion_terms_str}]"
             qulacs_observable = create_observable_from_openfermion_text(openfermion_str)
 
             for term_id in range(qulacs_observable.get_term_count()):
-                term = qulacs_observable.get_term(term_id)
+                qulacs_term = qulacs_observable.get_term(term_id)
                 expectation_values.append(
-                    np.real(term.get_expectation_value(qulacs_state))
+                    np.real(qulacs_term.get_expectation_value(qulacs_state))
                 )
         return ExpectationValues(np.array(expectation_values))
 
