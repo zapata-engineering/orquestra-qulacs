@@ -1,8 +1,6 @@
 ################################################################################
 # © Copyright 2021-2022 Zapata Computing Inc.
 ################################################################################
-from numbers import Real
-
 import numpy as np
 import qulacs
 from orquestra.quantum.circuits import Circuit, GateOperation
@@ -95,7 +93,7 @@ def _custom_qulacs_gate(operation: GateOperation):
     return qulacs.gate.DenseMatrix(list(operation.qubit_indices), dense_matrix)
 
 
-def convert_to_qulacs(circuit: Circuit):
+def convert_to_qulacs(circuit: Circuit) -> qulacs.QuantumCircuit:
     qulacs_circuit = qulacs.QuantumCircuit(circuit.n_qubits)
     for operation in circuit.operations:
         qulacs_circuit.add_gate(_qulacs_gate(operation))

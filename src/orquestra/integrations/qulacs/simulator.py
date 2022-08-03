@@ -8,7 +8,7 @@ import qulacs
 from orquestra.quantum.api.backend import QuantumSimulator, StateVector
 from orquestra.quantum.circuits import Circuit, GateOperation
 from orquestra.quantum.measurements import ExpectationValues, Measurements
-from orquestra.quantum.openfermion import SymbolicOperator
+from orquestra.quantum.wip.operators import PauliRepresentation
 from orquestra.quantum.wavefunction import flip_amplitudes, sample_from_wavefunction
 from qulacs.observable import create_observable_from_openfermion_text
 
@@ -35,7 +35,7 @@ class QulacsSimulator(QuantumSimulator):
         return Measurements(bitstrings)
 
     def get_exact_expectation_values(
-        self, circuit: Circuit, qubit_operator: SymbolicOperator
+        self, circuit: Circuit, qubit_operator: PauliRepresentation
     ) -> ExpectationValues:
         self.number_of_circuits_run += 1
         self.number_of_jobs_run += 1
@@ -43,8 +43,14 @@ class QulacsSimulator(QuantumSimulator):
         expectation_values = []
         qulacs_state = self._get_qulacs_state(circuit)
 
-        for op in qubit_operator:
-            qulacs_observable = create_observable_from_openfermion_text(str(op))
+        for op in qubit_operator.terms:
+            # openfermion text is in the style of '2.0 [Z0 Z1]' if the operator is
+            # QubitOperator("Z0 Z1", 2) aka PauliTerm("2*Z0*Z1")
+            openfermion_terms_str = " ".join(
+                [f"{pauli_str}{qubit_idx}" for qubit_idx, pauli_str in op._ops.items()]
+            )
+            openfermion_str = f"{op.coefficient} [{openfermion_terms_str}]"
+            qulacs_observable = create_observable_from_openfermion_text(openfermion_str)
 
             for term_id in range(qulacs_observable.get_term_count()):
                 term = qulacs_observable.get_term(term_id)
