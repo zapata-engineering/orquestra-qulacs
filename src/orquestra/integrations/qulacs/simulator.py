@@ -1,6 +1,7 @@
 ################################################################################
 # © Copyright 2020-2022 Zapata Computing Inc.
 ################################################################################
+from functools import lru_cache
 from typing import Any
 
 import numpy as np
@@ -13,6 +14,26 @@ from orquestra.quantum.wavefunction import flip_amplitudes, sample_from_wavefunc
 from qulacs.observable import create_observable_from_openfermion_text
 
 from .conversions import convert_to_qulacs
+
+
+@lru_cache()
+def get_qulacs_terms_from_orquestra_operator(qubit_operator: PauliRepresentation):
+    """
+    Convert an orquestra operator to a qulacs observable
+    """
+    qulacs_terms = []
+    for term in qubit_operator.terms:
+        # openfermion text is in the style of '2.0 [Z0 Z1]' if the operator is
+        # QubitOperator("Z0 Z1", 2) aka PauliTerm("2*Z0*Z1")
+        openfermion_terms_str = " ".join(
+            [f"{pauli_str}{qubit_idx}" for qubit_idx, pauli_str in term.operations]
+        )
+        openfermion_str = f"{term.coefficient} [{openfermion_terms_str}]"
+        qulacs_observable = create_observable_from_openfermion_text(openfermion_str)
+
+        for term_id in range(qulacs_observable.get_term_count()):
+            qulacs_terms.append(qulacs_observable.get_term(term_id))
+    return qulacs_terms
 
 
 class QulacsSimulator(QuantumSimulator):
@@ -40,23 +61,12 @@ class QulacsSimulator(QuantumSimulator):
         self.number_of_circuits_run += 1
         self.number_of_jobs_run += 1
 
-        expectation_values = []
         qulacs_state = self._get_qulacs_state(circuit)
-
-        for term in qubit_operator.terms:
-            # openfermion text is in the style of '2.0 [Z0 Z1]' if the operator is
-            # QubitOperator("Z0 Z1", 2) aka PauliTerm("2*Z0*Z1")
-            openfermion_terms_str = " ".join(
-                [f"{pauli_str}{qubit_idx}" for qubit_idx, pauli_str in term.operations]
+        expectation_values = []
+        for qulacs_term in get_qulacs_terms_from_orquestra_operator(qubit_operator):
+            expectation_values.append(
+                np.real(qulacs_term.get_expectation_value(qulacs_state))
             )
-            openfermion_str = f"{term.coefficient} [{openfermion_terms_str}]"
-            qulacs_observable = create_observable_from_openfermion_text(openfermion_str)
-
-            for term_id in range(qulacs_observable.get_term_count()):
-                qulacs_term = qulacs_observable.get_term(term_id)
-                expectation_values.append(
-                    np.real(qulacs_term.get_expectation_value(qulacs_state))
-                )
         return ExpectationValues(np.array(expectation_values))
 
     def _get_qulacs_state(
