@@ -1,7 +1,7 @@
 ################################################################################
 # © Copyright 2021-2022 Zapata Computing Inc.
 ################################################################################
-from typing import Any, Callable, Tuple
+from typing import Any, Callable, Dict, Tuple
 
 import numpy as np
 import qulacs
@@ -32,7 +32,9 @@ def _gate_factory_from_pauli_rotation(axes):
     return _factory
 
 
-ZQUANTUM_TO_QULACS_GATES = {
+QULACS_GATE_FACTORY = Callable[[Any], qulacs.QuantumGateBase]
+
+ZQUANTUM_TO_QULACS_GATES: Dict[str, Tuple[QULACS_GATE_FACTORY, Callable]] = {
     # 1-qubit, non-parametric
     "I": (qulacs_gate.Identity, _no_params),
     **{
@@ -81,7 +83,6 @@ def _qulacs_gate(operation: GateOperation):
         pass
 
     try:
-        qulacs_gate_factory: Callable[[Any], qulacs.QuantumGateBase]  # type: ignore
         qulacs_gate_factory, param_transform = ZQUANTUM_TO_QULACS_GATES[
             operation.gate.name
         ]
