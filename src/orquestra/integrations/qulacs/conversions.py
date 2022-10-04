@@ -34,7 +34,7 @@ def _gate_factory_from_pauli_rotation(axes):
 
 QULACS_GATE_FACTORY = Callable[[Any], qulacs.QuantumGateBase]
 
-ZQUANTUM_TO_QULACS_GATES: Dict[str, Tuple[QULACS_GATE_FACTORY, Callable]] = {
+ORQUESTRA_TO_QULACS_GATES: Dict[str, Tuple[QULACS_GATE_FACTORY, Callable]] = {
     # 1-qubit, non-parametric
     "I": (qulacs_gate.Identity, _no_params),
     **{
@@ -83,7 +83,7 @@ def _qulacs_gate(operation: GateOperation):
         pass
 
     try:
-        qulacs_gate_factory, param_transform = ZQUANTUM_TO_QULACS_GATES[
+        qulacs_gate_factory, param_transform = ORQUESTRA_TO_QULACS_GATES[
             operation.gate.name
         ]
         return qulacs_gate_factory(
