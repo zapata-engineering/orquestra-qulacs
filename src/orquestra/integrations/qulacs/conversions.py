@@ -62,10 +62,9 @@ ORQUESTRA_TO_QULACS_GATES: Dict[str, Tuple[QULACS_GATE_FACTORY, Callable]] = {
 
 def _make_cphase_gate(operation: GateOperation):
     matrix = np.diag([1.0, np.exp(1.0j * operation.gate.params[0])])  # type: ignore
-    # matrix = np.complex64(matrix)
     gate_to_add = qulacs_gate.DenseMatrix(
         operation.qubit_indices[1], matrix  # type: ignore
-    )  # noqa: E501
+    )
     gate_to_add.add_control_qubit(operation.qubit_indices[0], 1)
     return gate_to_add
 
@@ -100,7 +99,7 @@ def _custom_qulacs_gate(operation: GateOperation):
     dense_matrix = np.array(matrix, dtype=complex)
     return qulacs_gate.DenseMatrix(
         list(operation.qubit_indices), dense_matrix  # type: ignore
-    )  # noqa:E501
+    )
 
 
 def convert_to_qulacs(circuit: Circuit) -> qulacs.QuantumCircuit:
