@@ -1,9 +1,12 @@
 ################################################################################
 # © Copyright 2021-2022 Zapata Computing Inc.
 ################################################################################
+from typing import Any, Callable, Dict, Tuple
+
 import numpy as np
 import qulacs
 from orquestra.quantum.circuits import Circuit, GateOperation
+from qulacs import gate as qulacs_gate
 
 
 def _identity(x):
@@ -24,27 +27,29 @@ def _gate_factory_from_pauli_rotation(axes):
     def _factory(*args):
         qubit_indices = args[: len(axes)]
         params = args[len(axes) :]
-        return qulacs.gate.PauliRotation(qubit_indices, axes, *params)
+        return qulacs_gate.PauliRotation(qubit_indices, axes, *params)
 
     return _factory
 
 
-ZQUANTUM_TO_QULACS_GATES = {
+QULACS_GATE_FACTORY = Callable[[Any], qulacs.QuantumGateBase]
+
+ORQUESTRA_TO_QULACS_GATES: Dict[str, Tuple[QULACS_GATE_FACTORY, Callable]] = {
     # 1-qubit, non-parametric
-    "I": (qulacs.gate.Identity, _no_params),
+    "I": (qulacs_gate.Identity, _no_params),
     **{
-        gate_name: (getattr(qulacs.gate, gate_name), _no_params)
+        gate_name: (getattr(qulacs_gate, gate_name), _no_params)
         for gate_name in ["X", "Y", "Z", "H", "S", "T"]
     },
     # 1-qubit, parametric
     **{
-        gate_name: (getattr(qulacs.gate, gate_name), _negate)
+        gate_name: (getattr(qulacs_gate, gate_name), _negate)
         for gate_name in ["RX", "RY", "RZ"]
     },
-    "PHASE": (qulacs.gate.U1, _identity),
+    "PHASE": (qulacs_gate.U1, _identity),
     # 2-qubit, non-parametric
     **{
-        gate_name: (getattr(qulacs.gate, gate_name), _no_params)
+        gate_name: (getattr(qulacs_gate, gate_name), _no_params)
         for gate_name in ["CNOT", "SWAP"]
     },
     # 2-qubit, parametric
@@ -57,7 +62,9 @@ ZQUANTUM_TO_QULACS_GATES = {
 
 def _make_cphase_gate(operation: GateOperation):
     matrix = np.diag([1.0, np.exp(1.0j * operation.gate.params[0])])  # type: ignore
-    gate_to_add = qulacs.gate.DenseMatrix(operation.qubit_indices[1], matrix)
+    gate_to_add = qulacs_gate.DenseMatrix(
+        operation.qubit_indices[1], matrix  # type: ignore
+    )
     gate_to_add.add_control_qubit(operation.qubit_indices[0], 1)
     return gate_to_add
 
@@ -75,7 +82,7 @@ def _qulacs_gate(operation: GateOperation):
         pass
 
     try:
-        qulacs_gate_factory, param_transform = ZQUANTUM_TO_QULACS_GATES[
+        qulacs_gate_factory, param_transform = ORQUESTRA_TO_QULACS_GATES[
             operation.gate.name
         ]
         return qulacs_gate_factory(
@@ -90,7 +97,9 @@ def _qulacs_gate(operation: GateOperation):
 def _custom_qulacs_gate(operation: GateOperation):
     matrix = operation.gate.matrix
     dense_matrix = np.array(matrix, dtype=complex)
-    return qulacs.gate.DenseMatrix(list(operation.qubit_indices), dense_matrix)
+    return qulacs_gate.DenseMatrix(
+        list(operation.qubit_indices), dense_matrix  # type: ignore
+    )
 
 
 def convert_to_qulacs(circuit: Circuit) -> qulacs.QuantumCircuit:
