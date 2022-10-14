@@ -1,6 +1,7 @@
 ################################################################################
 # © Copyright 2021-2022 Zapata Computing Inc.
 ################################################################################
+from functools import lru_cache
 from typing import Any, Callable, Dict, Tuple
 
 import numpy as np
@@ -69,29 +70,13 @@ def _make_cphase_gate(operation: GateOperation):
     return gate_to_add
 
 
-GATE_SPECIAL_CASES = {
-    "CPHASE": _make_cphase_gate,
-}
-
-
 def _qulacs_gate(operation: GateOperation):
-    try:
-        factory = GATE_SPECIAL_CASES[operation.gate.name]
-        return factory(operation)
-    except KeyError:
-        pass
-
-    try:
-        qulacs_gate_factory, param_transform = ORQUESTRA_TO_QULACS_GATES[
-            operation.gate.name
-        ]
-        return qulacs_gate_factory(
-            *operation.qubit_indices, *map(param_transform, operation.params)
-        )
-    except KeyError:
-        pass
-
-    return _custom_qulacs_gate(operation)
+    qulacs_gate_factory, param_transform = ORQUESTRA_TO_QULACS_GATES[
+        operation.gate.name
+    ]
+    return qulacs_gate_factory(
+        *operation.qubit_indices, *map(param_transform, operation.params)
+    )
 
 
 def _custom_qulacs_gate(operation: GateOperation):
@@ -106,5 +91,4 @@ def convert_to_qulacs(circuit: Circuit) -> qulacs.QuantumCircuit:
     qulacs_circuit = qulacs.QuantumCircuit(circuit.n_qubits)
     for operation in circuit.operations:
         qulacs_circuit.add_gate(_qulacs_gate(operation))
-
     return qulacs_circuit
