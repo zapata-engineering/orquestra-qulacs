@@ -3,10 +3,6 @@
 ################################################################################
 import numpy as np
 import pytest
-from orquestra.quantum.api.backend_test import (
-    QuantumSimulatorGatesTest,
-    QuantumSimulatorTests,
-)
 from orquestra.quantum.circuits import Circuit, H, MultiPhaseOperation, X
 
 from orquestra.integrations.qulacs.simulator import QulacsSimulator
@@ -22,7 +18,7 @@ def wf_simulator():
     return QulacsSimulator()
 
 
-class TestQulacs(QuantumSimulatorTests):
+class TestQulacs:
     @pytest.mark.parametrize(
         "circuit, target_wavefunction",
         [
@@ -81,13 +77,9 @@ class TestQulacs(QuantumSimulatorTests):
         params = [-0.1, 0.3, -0.5, 0.7]
         circuit = Circuit([H(0), X(1), MultiPhaseOperation(params)])
 
-        measurements = backend.run_circuit_and_measure(circuit, n_samples=1000)
+        measurements = backend.run_and_measure(circuit, n_samples=1000)
 
         assert len(measurements.bitstrings) == 1000
         assert all(
             bitstring in [(0, 1), (1, 1)] for bitstring in measurements.bitstrings
         )
-
-
-class TestQulacsGates(QuantumSimulatorGatesTest):
-    pass
