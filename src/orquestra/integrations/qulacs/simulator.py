@@ -8,6 +8,7 @@ import numpy as np
 import qulacs
 from orquestra.quantum.api.wavefunction_simulator import BaseWavefunctionSimulator
 from orquestra.quantum.circuits import Circuit, GateOperation
+from orquestra.quantum.measurements.expectation_values import ExpectationValues
 from orquestra.quantum.operators import PauliRepresentation
 from orquestra.quantum.typing import StateVector
 from orquestra.quantum.wavefunction import flip_amplitudes
@@ -65,3 +66,17 @@ class QulacsSimulator(BaseWavefunctionSimulator):
 
     def can_be_executed_natively(self, operation: Any) -> bool:
         return isinstance(operation, GateOperation)
+
+       def get_exact_expectation_values(
+        self, circuit: Circuit, qubit_operator: PauliRepresentation
+    ) -> complex:
+        self.number_of_circuits_run += 1
+        self.number_of_jobs_run += 1
+
+        qulacs_state = self._get_qulacs_state(circuit)
+        expectation_values = []
+        for qulacs_term in get_qulacs_terms_from_orquestra_operator(qubit_operator):
+            expectation_values.append(
+                np.real(qulacs_term.get_expectation_value(qulacs_state))
+            )
+        return ExpectationValues(np.array(expectation_values)).values.sum()
