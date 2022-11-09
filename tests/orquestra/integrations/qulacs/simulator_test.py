@@ -3,13 +3,14 @@
 ################################################################################
 import numpy as np
 import pytest
+from orquestra.quantum.api.circuit_runner_contracts import CIRCUIT_RUNNER_CONTRACTS
 from orquestra.quantum.circuits import Circuit, H, MultiPhaseOperation, X
 
 from orquestra.integrations.qulacs.simulator import QulacsSimulator
 
 
 @pytest.fixture
-def backend():
+def runner():
     return QulacsSimulator()
 
 
@@ -67,19 +68,24 @@ class TestQulacs:
         ],
     )
     def test_get_wavefunction_works_with_multiphase_operator(
-        self, backend, circuit, target_wavefunction
+        self, runner, circuit, target_wavefunction
     ):
-        wavefunction = backend.get_wavefunction(circuit)
+        wavefunction = runner.get_wavefunction(circuit)
 
         np.testing.assert_almost_equal(wavefunction.amplitudes, target_wavefunction)
 
-    def test_run_circuit_and_measure_works_with_multiphase_operator(self, backend):
+    def test_run_circuit_and_measure_works_with_multiphase_operator(self, runner):
         params = [-0.1, 0.3, -0.5, 0.7]
         circuit = Circuit([H(0), X(1), MultiPhaseOperation(params)])
 
-        measurements = backend.run_and_measure(circuit, n_samples=1000)
+        measurements = runner.run_and_measure(circuit, n_samples=1000)
 
         assert len(measurements.bitstrings) == 1000
         assert all(
             bitstring in [(0, 1), (1, 1)] for bitstring in measurements.bitstrings
         )
+
+
+@pytest.mark.parametrize("contract", CIRCUIT_RUNNER_CONTRACTS)
+def test_qulacs_runner_fulfills_circuit_runner_contracts(runner, contract):
+    assert contract(runner)

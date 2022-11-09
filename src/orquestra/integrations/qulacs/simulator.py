@@ -67,11 +67,11 @@ class QulacsSimulator(BaseWavefunctionSimulator):
     def can_be_executed_natively(self, operation: Any) -> bool:
         return isinstance(operation, GateOperation)
 
-       def get_exact_expectation_values(
+    def get_exact_expectation_values(
         self, circuit: Circuit, qubit_operator: PauliRepresentation
     ) -> complex:
-        self.number_of_circuits_run += 1
-        self.number_of_jobs_run += 1
+        self._n_circuits_executed += 1
+        self._n_jobs_executed += 1
 
         qulacs_state = self._get_qulacs_state(circuit)
         expectation_values = []
