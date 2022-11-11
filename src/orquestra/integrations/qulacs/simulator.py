@@ -69,7 +69,7 @@ class QulacsSimulator(BaseWavefunctionSimulator):
 
     def get_exact_expectation_values(
         self, circuit: Circuit, qubit_operator: PauliRepresentation
-    ) -> complex:
+    ) -> float:
         self._n_circuits_executed += 1
         self._n_jobs_executed += 1
 
