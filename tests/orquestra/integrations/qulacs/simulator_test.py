@@ -98,10 +98,10 @@ def test_qulacs_runner_fulfills_circuit_runner_contracts(runner, contract):
 
 
 @pytest.mark.parametrize("contract", simulator_contracts_for_tolerance())
-def test_symbolic_simulator_fulfills_simulator_contracts(runner, contract):
+def test_qulacs_simulator_fulfills_simulator_contracts(runner, contract):
     assert contract(runner)
 
 
 @pytest.mark.parametrize("contract", STRICT_CIRCUIT_RUNNER_CONTRACTS)
-def test_symbolic_simulator_fulfills_strict_circuit_runnner(runner, contract):
+def test_qulacs_simulator_fulfills_strict_circuit_runnner(runner, contract):
     assert contract(runner)
