@@ -12,7 +12,7 @@ from orquestra.quantum.api.wavefunction_simulator_contracts import (
 )
 from orquestra.quantum.circuits import Circuit, H, MultiPhaseOperation, X
 
-from orquestra.integrations.qulacs.simulator import QulacsSimulator
+from orquestra.integrations.qulacs.runner import QulacsSimulator
 
 
 @pytest.fixture

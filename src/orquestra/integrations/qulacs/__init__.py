@@ -1,4 +1,4 @@
 ################################################################################
 # © Copyright 2020-2022 Zapata Computing Inc.
 ################################################################################
-from .simulator import QulacsSimulator
+from .runner import QulacsSimulator
