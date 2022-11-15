@@ -14,7 +14,7 @@ from orquestra.quantum.typing import StateVector
 from orquestra.quantum.wavefunction import flip_amplitudes
 from qulacs.observable import create_observable_from_openfermion_text
 
-from .conversions import convert_to_qulacs
+from ..conversions import convert_to_qulacs
 
 
 @lru_cache()
