@@ -9,15 +9,11 @@ from orquestra.quantum.api.circuit_runner_contracts import (
 )
 from orquestra.quantum.api.wavefunction_simulator_contracts import (
     simulator_contracts_for_tolerance,
+    simulator_contracts_with_nontrivial_initial_state,
 )
 from orquestra.quantum.circuits import Circuit, H, MultiPhaseOperation, X
 
 from orquestra.integrations.qulacs.simulator import QulacsSimulator
-
-
-@pytest.fixture
-def runner():
-    return QulacsSimulator()
 
 
 @pytest.fixture
@@ -74,17 +70,17 @@ class TestQulacs:
         ],
     )
     def test_get_wavefunction_works_with_multiphase_operator(
-        self, runner, circuit, target_wavefunction
+        self, wf_simulator, circuit, target_wavefunction
     ):
-        wavefunction = runner.get_wavefunction(circuit)
+        wavefunction = wf_simulator.get_wavefunction(circuit)
 
         np.testing.assert_almost_equal(wavefunction.amplitudes, target_wavefunction)
 
-    def test_run_circuit_and_measure_works_with_multiphase_operator(self, runner):
+    def test_run_circuit_and_measure_works_with_multiphase_operator(self, wf_simulator):
         params = [-0.1, 0.3, -0.5, 0.7]
         circuit = Circuit([H(0), X(1), MultiPhaseOperation(params)])
 
-        measurements = runner.run_and_measure(circuit, n_samples=1000)
+        measurements = wf_simulator.run_and_measure(circuit, n_samples=1000)
 
         assert len(measurements.bitstrings) == 1000
         assert all(
@@ -93,15 +89,20 @@ class TestQulacs:
 
 
 @pytest.mark.parametrize("contract", CIRCUIT_RUNNER_CONTRACTS)
-def test_qulacs_runner_fulfills_circuit_runner_contracts(runner, contract):
-    assert contract(runner)
+def test_qulacs_runner_fulfills_circuit_runner_contracts(wf_simulator, contract):
+    assert contract(wf_simulator)
 
 
-@pytest.mark.parametrize("contract", simulator_contracts_for_tolerance())
-def test_qulacs_simulator_fulfills_simulator_contracts(runner, contract):
-    assert contract(runner)
+@pytest.mark.parametrize(
+    "contract",
+    simulator_contracts_for_tolerance()
+    + simulator_contracts_with_nontrivial_initial_state(),
+)
+def test_qulacs_wf_simulator_fulfills_wf_simulator_contracts(wf_simulator, contract):
+    assert contract(wf_simulator)
 
 
+# QUESTION: do we need this test?
 @pytest.mark.parametrize("contract", STRICT_CIRCUIT_RUNNER_CONTRACTS)
-def test_qulacs_simulator_fulfills_strict_circuit_runnner(runner, contract):
-    assert contract(runner)
+def test_qulacs_simulator_fulfills_strict_circuit_runnner(wf_simulator, contract):
+    assert contract(wf_simulator)
