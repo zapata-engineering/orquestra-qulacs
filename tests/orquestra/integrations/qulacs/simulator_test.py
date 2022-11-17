@@ -102,7 +102,6 @@ def test_qulacs_wf_simulator_fulfills_wf_simulator_contracts(wf_simulator, contr
     assert contract(wf_simulator)
 
 
-# QUESTION: do we need this test?
 @pytest.mark.parametrize("contract", STRICT_CIRCUIT_RUNNER_CONTRACTS)
 def test_qulacs_simulator_fulfills_strict_circuit_runnner(wf_simulator, contract):
     assert contract(wf_simulator)
