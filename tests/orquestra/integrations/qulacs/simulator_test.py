@@ -10,6 +10,7 @@ from orquestra.quantum.api.circuit_runner_contracts import (
 from orquestra.quantum.api.wavefunction_simulator_contracts import (
     simulator_contracts_for_tolerance,
     simulator_contracts_with_nontrivial_initial_state,
+    simulator_gate_compatibility_contracts,
 )
 from orquestra.quantum.circuits import Circuit, H, MultiPhaseOperation, X
 
@@ -102,6 +103,6 @@ def test_qulacs_wf_simulator_fulfills_wf_simulator_contracts(wf_simulator, contr
     assert contract(wf_simulator)
 
 
-@pytest.mark.parametrize("contract", STRICT_CIRCUIT_RUNNER_CONTRACTS)
-def test_qulacs_simulator_fulfills_strict_circuit_runnner(wf_simulator, contract):
+@pytest.mark.parametrize("contract", simulator_gate_compatibility_contracts())
+def test_qulacs_simulator_uses_correct_gate_definitionscontract(wf_simulator, contract):
     assert contract(wf_simulator)
