@@ -38,6 +38,7 @@ def get_qulacs_terms_from_orquestra_operator(qubit_operator: PauliRepresentation
 
 
 class QulacsSimulator(BaseWavefunctionSimulator):
+    """Wavefunction simulator using Qulacs."""
 
     supports_batching = False
 
