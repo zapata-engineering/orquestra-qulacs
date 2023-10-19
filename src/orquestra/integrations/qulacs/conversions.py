@@ -32,7 +32,7 @@ def _gate_factory_from_pauli_rotation(axes):
     return _factory
 
 
-QULACS_GATE_FACTORY = Callable[[Any], qulacs.QuantumGateBase]
+QULACS_GATE_FACTORY = Callable[..., qulacs.QuantumGateBase]
 
 ORQUESTRA_TO_QULACS_GATES: Dict[str, Tuple[QULACS_GATE_FACTORY, Callable]] = {
     # 1-qubit, non-parametric
