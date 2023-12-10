@@ -97,6 +97,12 @@ def _qulacs_gate(operation: GateOperation):
 def _custom_qulacs_gate(operation: GateOperation):
     matrix = operation.gate.matrix
     dense_matrix = np.array(matrix, dtype=complex)
+
+    # Need to sandwich matrix between two SWAP gates
+    if dense_matrix.shape == (4, 4):
+        dense_matrix[:, [1, 2]] = dense_matrix[:, [2, 1]]
+        dense_matrix[[1, 2], :] = dense_matrix[[2, 1], :]
+
     return qulacs_gate.DenseMatrix(
         list(operation.qubit_indices), dense_matrix  # type: ignore
     )
@@ -106,5 +112,4 @@ def convert_to_qulacs(circuit: Circuit) -> qulacs.QuantumCircuit:
     qulacs_circuit = qulacs.QuantumCircuit(circuit.n_qubits)
     for operation in circuit.operations:
         qulacs_circuit.add_gate(_qulacs_gate(operation))
-
     return qulacs_circuit
