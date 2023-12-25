@@ -1,5 +1,5 @@
 """
-A simplified implementation of SU4 gates based on that from 
+A simplified implementation of SU4 gates based on that from
 ```orquestra.qml.models.qcbm.gate_factories.su4_factories```
 for testing purposes, with jax.numpy replaced with numpy
 """
