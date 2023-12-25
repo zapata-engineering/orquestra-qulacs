@@ -1,7 +1,7 @@
 ################################################################################
 # © Copyright 2021-2022 Zapata Computing Inc.
 ################################################################################
-from typing import Any, Callable, Dict, Tuple
+from typing import Callable
 
 import numpy as np
 import qulacs
@@ -34,7 +34,7 @@ def _gate_factory_from_pauli_rotation(axes):
 
 QULACS_GATE_FACTORY = Callable[..., qulacs.QuantumGateBase]
 
-ORQUESTRA_TO_QULACS_GATES: Dict[str, Tuple[QULACS_GATE_FACTORY, Callable]] = {
+ORQUESTRA_TO_QULACS_GATES: dict[str, tuple[QULACS_GATE_FACTORY, Callable]] = {
     # 1-qubit, non-parametric
     "I": (qulacs_gate.Identity, _no_params),
     **{
@@ -69,9 +69,36 @@ def _make_cphase_gate(operation: GateOperation):
     return gate_to_add
 
 
-GATE_SPECIAL_CASES = {
-    "CPHASE": _make_cphase_gate,
-}
+def _make_su4_gate(operation: GateOperation):
+    q0, q1 = operation.qubit_indices
+
+    # This scaling is copied verbatim from
+    # orquestra.qml.models.qcbm.gate_factories.su4_factories
+    angle_scaling = np.array([2, 1, 1, 2, 1, 1, 2, 2, 2, 2, 1, 1, 2, 1, 1])
+    params = operation.params[0] * angle_scaling
+
+    u3_factory, u3_param_transform = ORQUESTRA_TO_QULACS_GATES["U3"]
+    xx_factory, xx_param_transform = ORQUESTRA_TO_QULACS_GATES["XX"]
+    yy_factory, yy_param_transform = ORQUESTRA_TO_QULACS_GATES["YY"]
+    zz_factory, zz_param_transform = ORQUESTRA_TO_QULACS_GATES["ZZ"]
+
+    u3_factory(q0, *map(u3_param_transform, params[:3]))
+    gates_to_add = [
+        u3_factory(q0, *map(u3_param_transform, params[:3])),
+        u3_factory(q1, *map(u3_param_transform, params[3:6])),
+        ##
+        xx_factory(q0, q1, *map(xx_param_transform, params[6])),
+        yy_factory(q0, q1, *map(yy_param_transform, params[7])),
+        zz_factory(q0, q1, *map(zz_param_transform, params[8])),
+        ##
+        u3_factory(q0, *map(u3_param_transform, params[9:12])),
+        u3_factory(q1, *map(u3_param_transform, params[12:])),
+    ]
+
+    return qulacs_gate.merge(gate_list=gates_to_add)
+
+
+GATE_SPECIAL_CASES = {"CPHASE": _make_cphase_gate, "SU4": _make_su4_gate}
 
 
 def _qulacs_gate(operation: GateOperation):

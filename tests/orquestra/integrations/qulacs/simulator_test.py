@@ -24,6 +24,8 @@ from orquestra.quantum.circuits import (
 
 from orquestra.integrations.qulacs.simulator import QulacsSimulator
 
+from _su4 import SU4
+
 
 @pytest.fixture
 def wf_simulator():
@@ -76,6 +78,7 @@ class TestQulacs:
                 ),
                 np.array([np.exp(-0.1j), 0, np.exp(-0.5j), 0]) / np.sqrt(2),
             ),
+            # Single-gate U4 Circuit Test (Checks numerical correctness)
             (
                 Circuit(
                     [
@@ -122,52 +125,7 @@ class TestQulacs:
                     ]
                 ),
             ),
-            (
-                Circuit(
-                    [
-                        CustomGateDefinition(
-                            "U(4)",
-                            sympy.Matrix(
-                                [
-                                    [
-                                        -0.975009125641972,
-                                        0.219974039490932,
-                                        -0.0310830290906098,
-                                        0.00157231277796265,
-                                    ],
-                                    [
-                                        -0.0311767839440925,
-                                        0.00321671111665351,
-                                        0.997554769484509,
-                                        -0.0624671336880612,
-                                    ],
-                                    [
-                                        -0.00295223846610674,
-                                        -0.0147889480463319,
-                                        -0.0625351353074372,
-                                        -0.997928819182913,
-                                    ],
-                                    [
-                                        -0.2199465783908,
-                                        -0.975388313306714,
-                                        -0.00277200889962023,
-                                        0.0152792959760415,
-                                    ],
-                                ]
-                            ),
-                            params_ordering=(),
-                        )()(1, 0),
-                    ]
-                ),
-                np.array(
-                    [
-                        -0.975009125641972,
-                        -0.00295223846610674,
-                        -0.0311767839440925,
-                        -0.2199465783908,
-                    ]
-                ),
-            ),
+            # Two-gate U4 circuit test (verifies permutation correctness)
             (
                 Circuit(
                     [
@@ -250,6 +208,41 @@ class TestQulacs:
                     ]
                 ),
             ),
+            (
+                Circuit(
+                    [
+                        SU4(
+                            np.array(
+                                [
+                                    0.46470114,
+                                    0.02254167,
+                                    0.90526399,
+                                    0.83328487,
+                                    0.81589856,
+                                    0.17742145,
+                                    0.09612701,
+                                    0.69926428,
+                                    0.86622599,
+                                    0.02417199,
+                                    0.3877851,
+                                    0.95556799,
+                                    0.41237115,
+                                    0.33757767,
+                                    0.14386267,
+                                ]
+                            )
+                        )(0, 1)
+                    ]
+                ),
+                np.array(
+                    [
+                        0.26800149 - 0.3167006j,
+                        0.10799243 + 0.2658063j,
+                        0.00769411 + 0.35803059j,
+                        -0.42462006 + 0.6610698j,
+                    ]
+                ),
+            ),
         ],
     )
     def test_get_wavefunction_works_with_multiphase_operator(
@@ -257,12 +250,6 @@ class TestQulacs:
     ):
         wavefunction = wf_simulator.get_wavefunction(circuit)
 
-        # from orquestra.quantum.runners.symbolic_simulator import SymbolicSimulator
-
-        # np.testing.assert_almost_equal(
-        #     SymbolicSimulator().get_wavefunction(circuit).amplitudes,
-        #     target_wavefunction,
-        # )
         np.testing.assert_almost_equal(wavefunction.amplitudes, target_wavefunction)
 
     def test_run_circuit_and_measure_works_with_multiphase_operator(self, wf_simulator):
